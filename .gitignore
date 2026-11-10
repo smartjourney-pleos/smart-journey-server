@@ -1,0 +1,36 @@
+# ---- Gradle / Java ----
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+out/
+bin/
+*.class
+*.log
+hs_err_pid*
+
+# ---- IDE ----
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+.factorypath
+
+# ---- OS ----
+.DS_Store
+**/.DS_Store
+Thumbs.db
+
+# ---- 로컬 데이터 / 비밀값 (public 저장소: 절대 커밋 금지) ----
+.env
+.env.*
+!.env.example
+data/
+*.mv.db
+*.trace.db
+application-secret.yml
+local.properties
+
+# ---- 개인정보가 들어 있는 제출 서류 (연락처·이메일 포함) ----
+docs/SmartJourney/01_제출용/
