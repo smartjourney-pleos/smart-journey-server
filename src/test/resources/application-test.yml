@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:smartjourney-test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  flyway:
+    locations: classpath:db/migration,classpath:db/demo
+
+smartjourney:
+  auth:
+    jwt-secret: test-only-secret-0123456789abcdef0123456789abcdef
+  qr:
+    secret: test-only-qr-secret-0123456789abcdef0123456789abcdef
