@@ -1,0 +1,15 @@
+# 실제 PostgreSQL 사용 (클라우드 VM 배포, 또는 로컬에 PostgreSQL 을 직접 설치한 경우)
+# 실행: SPRING_PROFILES_ACTIVE=postgres ./gradlew bootRun
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/smartjourney}
+    username: ${DB_USERNAME:smartjourney}
+    password: ${DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: 10
+  flyway:
+    locations: classpath:db/migration
+
+smartjourney:
+  demo:
+    enabled: ${DEMO_ENABLED:true}
