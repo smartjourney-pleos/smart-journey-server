@@ -1,0 +1,14 @@
+# 로컬 개발용 (기본 프로필). DB 설치 없이 H2 파일 DB 를 PostgreSQL 호환 모드로 쓴다.
+# 데이터는 ./data/ 아래에 남는다. 지우면 초기화.
+spring:
+  datasource:
+    url: jdbc:h2:file:./data/smartjourney;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    username: sa
+    password:
+  flyway:
+    # 데모 매장(A 맛집, B 카페) 시드 포함
+    locations: classpath:db/migration,classpath:db/demo
+
+logging:
+  level:
+    com.smartjourney: DEBUG
