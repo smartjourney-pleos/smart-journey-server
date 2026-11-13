@@ -2,7 +2,7 @@
 # 차량 앱 없이 서버만으로 T1 흐름을 한 번 돌린다 (리허설·백업 시연 · Phase 5)
 # 실행하는 동안 POS 화면을 띄워 두면 카드가 실시간으로 바뀌는 걸 볼 수 있다.
 #
-#   bash scripts/demo-scenario.sh                         # localhost, A 맛집(1)
+#   bash scripts/demo-scenario.sh                         # localhost, 42dot(1)
 #   bash scripts/demo-scenario.sh <URL> [storeId] [PIN]
 #   PAUSE=3 bash scripts/demo-scenario.sh                 # 단계마다 3초 쉼 (PT 화면 따라가기)
 

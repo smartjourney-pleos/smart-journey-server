@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 /**
- * 통합 테스트용 짧은 호출 모음. (데모 매장 1 = A 맛집 5분/팀, 2 = B 카페 3분/팀, PIN 1234)
+ * 통합 테스트용 짧은 호출 모음. (데모 매장 1 = 42dot 5분/팀, 2 = 소프트웨어드림센터 3분/팀, PIN 1234)
  */
 public final class ApiFixture {
 

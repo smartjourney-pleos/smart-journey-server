@@ -68,7 +68,7 @@ class JourneyWaitingFlowTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.journeyId").value(journeyId))
                 .andExpect(jsonPath("$.status").value("ACTIVE"))
-                .andExpect(jsonPath("$.stops[0].storeName").value("A 맛집"))
+                .andExpect(jsonPath("$.stops[0].storeName").value("42dot"))
                 .andExpect(jsonPath("$.stops[1].seq").value(2))
                 .andExpect(jsonPath("$.stops[1].status").value("PLANNED"));
 
@@ -126,7 +126,7 @@ class JourneyWaitingFlowTest {
                 .andExpect(status().isCreated()));
         assertThat(first.get("ticketNo").asInt()).isPositive();
         assertThat(first.get("status").asText()).isEqualTo("REGISTERED");
-        assertThat(first.get("storeName").asText()).isEqualTo("A 맛집");
+        assertThat(first.get("storeName").asText()).isEqualTo("42dot");
 
         // 화면 승인과 음성 승인이 같은 키로 → 하나만
         JsonNode again = api.read(api.registerRaw(dev, "card-0001", journeyId, STORE_A, 4, "VOICE")
