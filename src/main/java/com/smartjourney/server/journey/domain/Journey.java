@@ -15,6 +15,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -87,6 +88,38 @@ public class Journey extends BaseTimeEntity {
     public void changeParty(int partySize, PartySource source) {
         this.partySize = partySize;
         this.partySource = source;
+    }
+
+    public Optional<JourneyStop> stopForStore(long storeId) {
+        return stops.stream().filter(s -> s.getStoreId() == storeId).findFirst();
+    }
+
+    public Optional<JourneyStop> stopForWaiting(long waitingId) {
+        return stops.stream().filter(s -> s.getWaitingId() != null && s.getWaitingId() == waitingId).findFirst();
+    }
+
+    /** 아직 웨이팅 전이거나 웨이팅 중인 매장이 남아 있는지 */
+    public boolean hasPendingStops() {
+        return stops.stream().anyMatch(s -> s.getStatus() == StopStatus.PLANNED || s.getStatus() == StopStatus.WAITING);
+    }
+
+    /**
+     * 순서 변경 1단계: seq 를 임시 값(원래 + offset)으로 옮긴다.
+     * (journey_id, seq) 유니크 제약 때문에 바로 바꾸면 중간에 겹친다 → 서비스가 flush 후 {@link #applyOrder} 호출
+     */
+    public void shiftSeqs(int offset) {
+        stops.forEach(s -> s.reorder(s.getSeq() + offset));
+    }
+
+    /** 순서 변경 2단계. storeIdsInOrder 는 기존 매장들의 순열이어야 한다 */
+    public void applyOrder(List<Long> storeIdsInOrder) {
+        for (int i = 0; i < storeIdsInOrder.size(); i++) {
+            long storeId = storeIdsInOrder.get(i);
+            JourneyStop stop = stopForStore(storeId)
+                    .orElseThrow(() -> new IllegalArgumentException("not in journey: " + storeId));
+            stop.reorder(i + 1);
+        }
+        stops.sort(java.util.Comparator.comparingInt(JourneyStop::getSeq));
     }
 
     public void end(Instant now) {
