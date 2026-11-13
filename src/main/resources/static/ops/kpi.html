@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>스마트 저니 운영 지표</title>
+  <style>
+    :root { --ink: #1a1a1a; --muted: #6b6b6b; --line: #e4e4e4; --soft: #f6f6f4; --accent: #1f6feb; --good: #1a7f37; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 32px 16px 48px; font-family: -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+           color: var(--ink); background: #fff; line-height: 1.5; }
+    main { max-width: 1040px; margin: 0 auto; }
+    h1 { font-size: 22px; margin: 0; }
+    .sub { color: var(--muted); font-size: 13px; margin: 4px 0 24px; }
+    form { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; margin-bottom: 24px; }
+    label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); gap: 4px; }
+    input { font: inherit; font-size: 14px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; }
+    input[type=password] { width: 220px; }
+    button { font: inherit; font-size: 14px; padding: 8px 16px; border: 0; border-radius: 8px; background: var(--ink);
+             color: #fff; cursor: pointer; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 28px; }
+    .card { background: var(--soft); border-radius: 12px; padding: 16px; }
+    .card .k { font-size: 13px; color: var(--muted); }
+    .card .v { font-size: 28px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+    .card .d { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    h2 { font-size: 15px; margin: 0 0 10px; }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+    th { color: var(--muted); font-weight: 500; }
+    th:first-child, td:first-child { text-align: left; }
+    tr.snap td:first-child::after { content: " · 보존본"; color: var(--muted); font-size: 11px; }
+    .bar { display: inline-block; height: 6px; border-radius: 3px; background: var(--accent); vertical-align: middle;
+           margin-right: 6px; }
+    .msg { color: #b42318; font-size: 14px; min-height: 20px; }
+    .note { color: var(--muted); font-size: 12px; margin-top: 16px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>운영 지표</h1>
+  <p class="sub">PRD 핵심 지표 · 하루 단위(Asia/Seoul) · 개인을 알아볼 수 있는 값은 없습니다</p>
+
+  <form id="f">
+    <label>운영 토큰 <input id="token" type="password" autocomplete="off" required></label>
+    <label>시작 <input id="from" type="date"></label>
+    <label>끝 <input id="to" type="date"></label>
+    <button type="submit">보기</button>
+  </form>
+  <p class="msg" id="msg"></p>
+
+  <section class="cards" id="cards"></section>
+
+  <h2>날짜별</h2>
+  <div class="table-wrap">
+    <table>
+      <thead>
+      <tr>
+        <th>날짜</th><th>여정</th><th>인원 제안 수락</th><th>승인 카드</th><th>카드 → 접수</th>
+        <th>음성 승인</th><th>하차 자동 확정</th><th>착석</th><th>노쇼</th><th>취소</th><th>주행 중 차단</th>
+      </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <p class="note">원본 기록은 보유 기간(30일) 뒤 파기되고, 그날 숫자만 "보존본"으로 남습니다.</p>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const pct = (v) => (v == null ? '–' : Math.round(v * 100) + '%');
+  const sum = (days, f) => days.reduce((a, d) => a + f(d), 0);
+  const ratio = (a, b) => (b === 0 ? null : a / b);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  try { $('token').value = sessionStorage.getItem('sj-ops-token') || ''; } catch (e) { /* 저장소 없음 */ }
+
+  function card(k, v, d) {
+    return `<div class="card"><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div><div class="d">${esc(d)}</div></div>`;
+  }
+
+  function bar(v) {
+    return v == null ? '–' : `<span class="bar" style="width:${Math.round(v * 40)}px"></span>${pct(v)}`;
+  }
+
+  function render(data) {
+    const days = data.days;
+    const journeys = sum(days, (d) => d.journeys.started);
+    const sensor = sum(days, (d) => d.journeys.sensorAccepted);
+    const shown = sum(days, (d) => d.prompts.shown);
+    const registered = sum(days, (d) => d.prompts.registered);
+    const voice = sum(days, (d) => d.approvals.voice);
+    const approvals = voice + sum(days, (d) => d.approvals.touch);
+    const arrivals = sum(days, (d) => d.arrivals.confirmed + d.arrivals.manual + d.arrivals.unconfirmed);
+    const confirmed = sum(days, (d) => d.arrivals.confirmed);
+
+    $('cards').innerHTML = [
+      card('여정', journeys.toLocaleString(), `${data.from} ~ ${data.to}`),
+      card('인원 제안 수락률', pct(ratio(sensor, journeys)), `센서 제안 그대로 ${sensor} / ${journeys}`),
+      card('승인 카드 → 접수', pct(shown ? Math.min(1, registered / shown) : null), `카드 ${shown} · 접수 ${registered}`),
+      card('음성 승인 비율', pct(ratio(voice, approvals)), `음성 ${voice} / 전체 ${approvals}`),
+      card('하차 자동 확정률', pct(ratio(confirmed, arrivals)), `확정 ${confirmed} / 보고 ${arrivals}`),
+    ].join('');
+
+    $('rows').innerHTML = days.slice().reverse().map((d) => `
+      <tr class="${d.snapshot ? 'snap' : ''}">
+        <td>${esc(d.date)}</td>
+        <td>${d.journeys.started}</td>
+        <td>${bar(d.journeys.partySuggestionAcceptRate)}</td>
+        <td>${d.prompts.shown} <span style="color:var(--muted)">(거절 ${d.prompts.declined} · 무응답 ${d.prompts.timeout})</span></td>
+        <td>${bar(d.prompts.acceptRate)}</td>
+        <td>${bar(d.approvals.voiceRate)}</td>
+        <td>${bar(d.arrivals.confirmedRate)}</td>
+        <td>${d.outcomes.seated}</td>
+        <td>${d.outcomes.noShow}</td>
+        <td>${d.outcomes.cancelled}</td>
+        <td>${d.driving.restrictedActionsBlocked}</td>
+      </tr>`).join('');
+  }
+
+  async function load() {
+    $('msg').textContent = '';
+    const token = $('token').value.trim();
+    try { sessionStorage.setItem('sj-ops-token', token); } catch (e) { /* 저장소 없음 */ }
+    const q = new URLSearchParams();
+    if ($('from').value) q.set('from', $('from').value);
+    if ($('to').value) q.set('to', $('to').value);
+    try {
+      const res = await fetch('/api/v1/ops/kpi/daily?' + q, { headers: { 'X-Ops-Token': token } });
+      const body = await res.json();
+      if (!res.ok) { $('msg').textContent = body.message || ('오류 ' + res.status); return; }
+      $('from').value = body.from;
+      $('to').value = body.to;
+      render(body);
+    } catch (e) {
+      $('msg').textContent = '서버에 연결하지 못했습니다.';
+    }
+  }
+
+  $('f').addEventListener('submit', (e) => { e.preventDefault(); load(); });
+  if ($('token').value) load();
+</script>
+</body>
+</html>
