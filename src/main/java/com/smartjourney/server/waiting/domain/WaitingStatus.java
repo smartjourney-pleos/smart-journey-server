@@ -34,6 +34,11 @@ public enum WaitingStatus {
         return ACTIVE.contains(this);
     }
 
+    /** 줄 서 있는 팀 (예상 대기 계산 대상) */
+    public boolean isInLine() {
+        return COUNTED_AHEAD.contains(this);
+    }
+
     public boolean isClosed() {
         return !isActive();
     }
