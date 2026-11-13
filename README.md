@@ -34,7 +34,7 @@ bash scripts/demo-scenario.sh        # 서버만으로 T1 흐름 (앱 없이)
 | http://localhost:8080/ops/kpi.html | 운영 지표 대시보드 (로컬 토큰 `local-ops`) |
 
 - Pleos 에뮬레이터에서는 `http://10.0.2.2:8080`
-- 데모 매장: `A 맛집`(id 1), `B 카페`(id 2) · POS PIN `1234`
+- 데모 매장: `42dot`(id 1), `소프트웨어드림센터`(id 2) — 차량 앱과 같은 장소·POI (웨이팅은 시연 데이터) · POS PIN `1234`
 - 로컬 DB 초기화: `data/` 폴더 삭제
 
 ### PostgreSQL 로 실행

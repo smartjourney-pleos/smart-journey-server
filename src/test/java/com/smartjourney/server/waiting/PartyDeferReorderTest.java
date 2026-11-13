@@ -125,7 +125,7 @@ class PartyDeferReorderTest {
                 .andExpect(jsonPath("$.stops[1].storeId").value(STORE_A))
                 .andExpect(jsonPath("$.stops[1].seq").value(2));
         mvc.perform(device(get("/api/v1/journeys/current"), dev))
-                .andExpect(jsonPath("$.stops[0].storeName").value("B 카페"));
+                .andExpect(jsonPath("$.stops[0].storeName").value("소프트웨어드림센터"));
 
         mvc.perform(device(json(put("/api/v1/journeys/" + journeyId + "/stops"), "{\"storeIds\":[1]}"), dev))
                 .andExpect(status().isBadRequest());
