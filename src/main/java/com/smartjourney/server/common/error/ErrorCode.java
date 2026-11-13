@@ -21,6 +21,8 @@ public enum ErrorCode {
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     DEMO_DISABLED(HttpStatus.FORBIDDEN, "데모 기능이 꺼져 있습니다."),
 
+    POS_LOGIN_LOCKED(HttpStatus.TOO_MANY_REQUESTS, "PIN 을 여러 번 틀려 잠시 잠겼습니다. 잠시 후 다시 시도해 주세요."),
+
     // 404
     NOT_FOUND(HttpStatus.NOT_FOUND, "대상을 찾을 수 없습니다."),
     STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "매장을 찾을 수 없습니다."),
