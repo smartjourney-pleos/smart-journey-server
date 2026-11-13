@@ -2,6 +2,7 @@ package com.smartjourney.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -15,7 +16,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  *
  * 명령은 REST, 상태 변화 알림은 STOMP 구독. 클라이언트는 재연결 시 REST 로 현재 상태를 다시 받아 맞춘다.
  */
-@SpringBootApplication
+// 로그인 폼·Basic 인증을 안 쓰므로 기본 사용자(임시 비밀번호 로그 출력)도 만들지 않는다
+@SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
 @ConfigurationPropertiesScan
 @EnableScheduling
 public class SmartJourneyServerApplication {
