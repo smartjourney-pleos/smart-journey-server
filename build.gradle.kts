@@ -1,5 +1,6 @@
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.5.3"
     id("io.spring.dependency-management") version "1.1.7"
 }
@@ -64,4 +65,13 @@ tasks.withType<JavaCompile> {
 tasks.withType<Test> {
     useJUnitPlatform()
     systemProperty("spring.profiles.active", "test")
+}
+
+// 테스트 커버리지 (Phase 6): ./gradlew test jacocoTestReport → build/reports/jacoco/test/html/index.html
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        html.required = true
+        xml.required = true
+    }
 }
