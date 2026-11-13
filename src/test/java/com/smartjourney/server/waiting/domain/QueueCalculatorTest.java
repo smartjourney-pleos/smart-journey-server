@@ -43,4 +43,14 @@ class QueueCalculatorTest {
         long b = QueueCalculator.initialQueueOrder(Instant.ofEpochMilli(1_001));
         assertThat(b - a).isEqualTo(1_000);
     }
+
+    @Test
+    @DisplayName("줄 선 팀의 예상 대기: 수동 대기시간이 있으면 내 위치 비율만큼")
+    void waitAtPosition() {
+        assertThat(QueueCalculator.estimatedWaitMinAt(null, 2, 5, 5)).isEqualTo(10);
+        assertThat(QueueCalculator.estimatedWaitMinAt(30, 0, 3, 5)).isZero();
+        assertThat(QueueCalculator.estimatedWaitMinAt(30, 1, 3, 5)).isEqualTo(10);
+        assertThat(QueueCalculator.estimatedWaitMinAt(30, 3, 3, 5)).isEqualTo(30);
+        assertThat(QueueCalculator.estimatedWaitMinAt(10, 1, 3, 5)).isEqualTo(4);
+    }
 }
