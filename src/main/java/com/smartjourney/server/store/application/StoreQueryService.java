@@ -42,9 +42,7 @@ public class StoreQueryService {
 
     /** 새로 줄을 서는 팀 기준(맨 뒤) 대기 현황 */
     public QueueStatusResponse queueStatus(Store store) {
-        int aheadTeams = waitingRepository
-                .findByStoreIdAndStatusInOrderByQueueOrderAsc(store.getId(), WaitingStatus.COUNTED_AHEAD)
-                .size();
+        int aheadTeams = (int) waitingRepository.countByStoreIdAndStatusIn(store.getId(), WaitingStatus.COUNTED_AHEAD);
         int waitMin = QueueCalculator.estimatedWaitMin(store.getManualWaitMin(), aheadTeams, store.getMinutesPerTeam());
         return new QueueStatusResponse(store.getId(), aheadTeams, waitMin, store.getArrivalBufferMin(),
                 store.getManualWaitMin() != null, clock.instant());

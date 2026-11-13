@@ -27,6 +27,27 @@ public final class QueueCalculator {
         return aheadTeams * minutesPerTeam;
     }
 
+    /**
+     * 이미 줄 서 있는 팀의 예상 대기.
+     * 점주 수동 대기시간이 있으면 "맨 뒤에 새로 선 팀" 기준 값이므로 내 위치 비율만큼 나눠 쓴다:
+     * {@code ceil(manualWaitMin × aheadTeams / teamsInLine)}. 없으면 {@code aheadTeams × minutesPerTeam}.
+     *
+     * @param teamsInLine 지금 줄 서 있는 팀 수 (REGISTERED·ARRIVED, 나 포함)
+     */
+    public static int estimatedWaitMinAt(Integer manualWaitMin, int aheadTeams, int teamsInLine, int minutesPerTeam) {
+        if (aheadTeams < 0 || minutesPerTeam < 0 || teamsInLine < 0) {
+            throw new IllegalArgumentException("counts must be >= 0");
+        }
+        if (manualWaitMin == null) {
+            return aheadTeams * minutesPerTeam;
+        }
+        if (aheadTeams == 0 || teamsInLine == 0) {
+            return 0;
+        }
+        int manual = Math.max(0, manualWaitMin);
+        return (int) Math.ceil((double) manual * Math.min(aheadTeams, teamsInLine) / teamsInLine);
+    }
+
     public static Instant estimatedEntryAt(Instant now, int estimatedWaitMin) {
         return now.plus(Duration.ofMinutes(Math.max(0, estimatedWaitMin)));
     }

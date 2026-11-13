@@ -14,7 +14,8 @@ public record AppProperties(
         Qr qr,
         Web web,
         Demo demo,
-        Route route
+        Route route,
+        Ops ops
 ) {
 
     /** 외부 전송 동의 고지 버전과 보유 기간 (정책 4) */
@@ -39,5 +40,9 @@ public record AppProperties(
 
     /** 코스 순서 최적화 제공자: none | kakao (P1) */
     public record Route(String provider, String kakaoRestApiKey) {
+    }
+
+    /** 운영 지표 API 토큰 (X-Ops-Token). 비어 있으면 KPI API 꺼짐 */
+    public record Ops(String token) {
     }
 }

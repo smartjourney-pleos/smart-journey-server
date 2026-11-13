@@ -1,0 +1,19 @@
+# /etc/caddy/Caddyfile — HTTPS(자동 인증서) + WSS 리버스 프록시
+# DOMAIN 은 VM 공인 IP 를 가리키는 도메인 (예: api.smartjourney.example)
+# 무료 도메인이 없으면 <공인IP>.sslip.io 도 된다 (예: 3.35.10.20.sslip.io)
+#
+#   sudo cp deploy/Caddyfile /etc/caddy/Caddyfile
+#   sudo sed -i 's/{$DOMAIN}/api.smartjourney.example/' /etc/caddy/Caddyfile   # 또는 /etc/default/caddy 에 DOMAIN=…
+#   sudo systemctl reload caddy
+
+{$DOMAIN} {
+	encode gzip
+
+	# Caddy 는 WebSocket Upgrade 를 그대로 넘기고 연결 시간 제한도 없다 → wss://{$DOMAIN}/ws
+	reverse_proxy 127.0.0.1:8080
+
+	log {
+		output file /var/log/caddy/smartjourney.log
+		format console
+	}
+}

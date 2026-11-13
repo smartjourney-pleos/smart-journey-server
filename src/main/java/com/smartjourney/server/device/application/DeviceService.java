@@ -8,9 +8,11 @@ import com.smartjourney.server.device.api.DeviceDtos.DeviceStatusResponse;
 import com.smartjourney.server.device.api.DeviceDtos.RegisterDeviceResponse;
 import com.smartjourney.server.device.domain.ConsentNotice;
 import com.smartjourney.server.device.domain.Device;
+import com.smartjourney.server.device.domain.DeviceConsentRevoked;
 import com.smartjourney.server.device.domain.DeviceRepository;
 import java.time.Clock;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,7 @@ public class DeviceService {
     private final DeviceRepository deviceRepository;
     private final AppProperties properties;
     private final Clock clock;
+    private final ApplicationEventPublisher events;
 
     public ConsentNotice currentNotice() {
         return ConsentNotice.current(properties.consent().currentVersion(), properties.consent().retentionDays());
@@ -53,12 +56,17 @@ public class DeviceService {
 
     /**
      * 철회. 이후 전송은 필터에서 전부 막힌다.
-     * TODO(Phase 3): 진행 중인 웨이팅이 있으면 취소 처리 + 보유 데이터 즉시 파기 여부 결정
+     * 정책 (3-6): 진행 중 여정은 끝내고 줄 서 있는 웨이팅은 취소해 매장에 알린다 (같은 트랜잭션).
+     * 이미 호출된 팀은 매장에 있으므로 그대로 두고, 쌓인 기록은 보유 기간(30일) 뒤 DataRetentionJob 이 파기한다.
      */
     @Transactional
     public DeviceStatusResponse revoke(long deviceId) {
         Device device = get(deviceId);
+        boolean wasActive = !device.isRevoked();
         device.revoke(clock.instant());
+        if (wasActive) {
+            events.publishEvent(new DeviceConsentRevoked(deviceId));
+        }
         return toStatus(device);
     }
 

@@ -20,11 +20,12 @@ public final class JourneyDtos {
     private JourneyDtos() {
     }
 
-    @Schema(description = "여정 시작 (V-05 [여정 시작]). 순서 = 내비 입력 순서 (경유지 FIRST, SECOND, 목적지)")
+    @Schema(description = "여정 시작 (V-05 [여정 시작]). 순서 = 내비 입력 순서 (경유지 FIRST, SECOND, 목적지). "
+            + "4곳 이상이면 400 TOO_MANY_STOPS")
     public record CreateJourneyRequest(
             @Min(1) @Max(9) int partySize,
             @NotNull PartySource partySource,
-            @NotEmpty @Size(max = 3) List<@NotNull Long> storeIds
+            @NotEmpty List<@NotNull Long> storeIds
     ) {
     }
 

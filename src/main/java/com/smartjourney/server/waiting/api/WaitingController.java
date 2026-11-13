@@ -44,7 +44,8 @@ public class WaitingController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public WaitingResponse create(@AuthenticationPrincipal DevicePrincipal device,
-                                  @RequestHeader(AuthHeaders.IDEMPOTENCY_KEY) @Size(min = 8, max = 64) String idempotencyKey,
+                                  @RequestHeader(name = AuthHeaders.IDEMPOTENCY_KEY, required = false)
+                                  @Size(min = 8, max = 64) String idempotencyKey,
                                   @Valid @RequestBody CreateWaitingRequest request) {
         return waitingService.create(device.deviceId(), idempotencyKey, request);
     }

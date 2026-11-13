@@ -1,8 +1,10 @@
 package com.smartjourney.server.waiting.domain;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,17 +13,31 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     boolean existsByIdAndDeviceId(Long id, Long deviceId);
 
+    Optional<Waiting> findByIdAndDeviceId(Long id, Long deviceId);
+
+    Optional<Waiting> findByIdAndStoreId(Long id, Long storeId);
+
     /** 대기열 (POS 보드·순번 계산) */
     List<Waiting> findByStoreIdAndStatusInOrderByQueueOrderAsc(Long storeId, Collection<WaitingStatus> statuses);
+
+    long countByStoreIdAndStatusIn(Long storeId, Collection<WaitingStatus> statuses);
 
     /** 내 앞 팀 수 */
     long countByStoreIdAndStatusInAndQueueOrderLessThan(Long storeId, Collection<WaitingStatus> statuses,
                                                         long queueOrder);
 
+    /** 순번 미루기: 내 뒤에 줄 선 팀들 */
+    List<Waiting> findByStoreIdAndStatusInAndQueueOrderGreaterThanOrderByQueueOrderAsc(
+            Long storeId, Collection<WaitingStatus> statuses, long queueOrder);
+
     /** 같은 여정·같은 매장에 진행 중인 웨이팅이 있는지 (중복 접수 방지) */
     boolean existsByJourneyIdAndStoreIdAndStatusIn(Long journeyId, Long storeId, Collection<WaitingStatus> statuses);
 
     List<Waiting> findByJourneyId(Long journeyId);
+
+    List<Waiting> findByJourneyIdAndStatusIn(Long journeyId, Collection<WaitingStatus> statuses);
+
+    List<Waiting> findByDeviceIdAndStatusIn(Long deviceId, Collection<WaitingStatus> statuses);
 
     /** 오늘 번호표 최댓값. 호출 전 매장 행을 잠근다 (StoreRepository.findByIdForUpdate) */
     @Query("select coalesce(max(w.ticketNo), 0) from Waiting w "
@@ -31,4 +47,16 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     /** 데모 패널 −1: 가장 늦게 들어온 현장 대기 팀 */
     List<Waiting> findByStoreIdAndChannelAndStatusInOrderByQueueOrderDesc(
             Long storeId, WaitingChannel channel, Collection<WaitingStatus> statuses);
+
+    /** KPI 집계 */
+    List<Waiting> findByRegisteredAtGreaterThanEqualAndRegisteredAtLessThan(Instant from, Instant to);
+
+    /** 보유 기간 파기 */
+    @Query("select w.id from Waiting w where w.closedAt is not null and w.closedAt < :before")
+    List<Long> findClosedIdsBefore(@Param("before") Instant before);
+
+    @Query("select w.id from Waiting w where w.journeyId in :journeyIds")
+    List<Long> findIdsByJourneyIdIn(@Param("journeyIds") Collection<Long> journeyIds);
+
+    boolean existsByDeviceId(Long deviceId);
 }

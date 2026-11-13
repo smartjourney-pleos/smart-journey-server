@@ -11,3 +11,5 @@ smartjourney:
     jwt-secret: test-only-secret-0123456789abcdef0123456789abcdef
   qr:
     secret: test-only-qr-secret-0123456789abcdef0123456789abcdef
+  ops:
+    token: test-ops-token

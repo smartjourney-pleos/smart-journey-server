@@ -9,6 +9,11 @@ spring:
     # 데모 매장(A 맛집, B 카페) 시드 포함
     locations: classpath:db/migration,classpath:db/demo
 
+smartjourney:
+  ops:
+    # 로컬 전용. 배포 환경은 OPS_TOKEN 환경변수로
+    token: ${OPS_TOKEN:local-ops}
+
 logging:
   level:
     com.smartjourney: DEBUG

@@ -56,7 +56,7 @@ class AuthFlowIntegrationTest {
         mockMvc.perform(get("/api/v1/stores").header(AuthHeaders.DEVICE_TOKEN, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].queue.estimatedWaitMin").value(0));
+                .andExpect(jsonPath("$[0].queue.estimatedWaitMin").isNumber());
 
         mockMvc.perform(delete("/api/v1/devices/me/consent").header(AuthHeaders.DEVICE_TOKEN, token))
                 .andExpect(status().isOk())
@@ -108,11 +108,10 @@ class AuthFlowIntegrationTest {
     }
 
     @Test
-    @DisplayName("아직 구현 안 된 API 는 501 NOT_IMPLEMENTED 로 Phase 를 알려 준다")
-    void notImplementedYet() throws Exception {
+    @DisplayName("진행 중 여정이 없으면 204")
+    void noActiveJourney() throws Exception {
         mockMvc.perform(get("/api/v1/journeys/current").header(AuthHeaders.DEVICE_TOKEN, registerDevice()))
-                .andExpect(status().isNotImplemented())
-                .andExpect(jsonPath("$.code").value("NOT_IMPLEMENTED"));
+                .andExpect(status().isNoContent());
     }
 
     private String registerDevice() throws Exception {

@@ -8,8 +8,8 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      # 스키마는 Flyway 가 관리한다. 엔티티 매핑이 안정되면 validate 로 올린다 (Phase 1).
-      ddl-auto: none
+      # 스키마는 Flyway 가 관리한다. 부팅 시 엔티티 ↔ 스키마 불일치를 바로 잡아낸다 (3-7)
+      ddl-auto: validate
     properties:
       hibernate:
         jdbc.time_zone: UTC
@@ -57,5 +57,8 @@ smartjourney:
     enabled: true
   route:
     # none = 사용자가 고른 순서를 그대로 돌려줌 / kakao = 카카오모빌리티 소요시간으로 순서 최적화 (P1)
-    provider: none
+    provider: ${ROUTE_PROVIDER:none}
     kakao-rest-api-key: ${KAKAO_REST_API_KEY:}
+  ops:
+    # 운영 지표(KPI) API·대시보드 접근 토큰 (헤더 X-Ops-Token). 비어 있으면 KPI API 는 403
+    token: ${OPS_TOKEN:}

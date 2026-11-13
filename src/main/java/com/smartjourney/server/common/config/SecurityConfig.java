@@ -66,6 +66,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/devices").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/pos/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/pos/stores").permitAll()
+                        // 운영 지표: 컨트롤러가 X-Ops-Token 검사 / 대시보드 정적 페이지
+                        .requestMatchers("/api/v1/ops/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/ops/kpi.html").permitAll()
                         // 매장 POS
                         .requestMatchers("/api/v1/pos/**").hasRole(PosPrincipal.ROLE)
                         // 차량 앱
