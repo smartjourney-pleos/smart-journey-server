@@ -61,6 +61,11 @@ public class JourneyStop extends BaseTimeEntity {
         this.status = StopStatus.WAITING;
     }
 
+    /** 취소 후 같은 매장에 다시 접수하는 경우 포함 */
+    public boolean canRegisterWaiting() {
+        return status == StopStatus.PLANNED || status == StopStatus.DONE;
+    }
+
     public void markDone() {
         this.status = StopStatus.DONE;
     }
